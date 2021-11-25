@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e9cb9efd-f232-4ade-a71f-4ee77f8a98bb" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings" doNotAsk="true" synchronizationState="SYNCHRONIZE">
+    <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
+    <execution />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CSS File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="JsFlowSettings">
+    <service-enabled>true</service-enabled>
+    <exe-path />
+    <other-services-enabled>true</other-services-enabled>
+    <auto-save>true</auto-save>
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration">
+    <include_path>
+      <path value="$PROJECT_DIR$/vendor/scssphp/src" />
+      <path value="$PROJECT_DIR$/vendor/scssphp/bin" />
+      <path value="" />
+      <path value="$PROJECT_DIR$/../../../includes" />
+      <path value="$PROJECT_DIR$/../../../phpbb" />
+      <path value="$PROJECT_DIR$/../../../vendor" />
+    </include_path>
+  </component>
+  <component name="ProjectId" id="21ClVMWOxQF8vcrK1l0bRYNzMd8" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="list.type.of.created.stylesheet" value="CSS" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.build" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e9cb9efd-f232-4ade-a71f-4ee77f8a98bb" name="Default Changelist" comment="" />
+      <created>1637452972970</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1637452972970</updated>
+      <workItem from="1637452974222" duration="3769000" />
+      <workItem from="1637503508693" duration="8588000" />
+      <workItem from="1637585949333" duration="7464000" />
+      <workItem from="1637673413499" duration="353000" />
+      <workItem from="1637763332777" duration="11571000" />
+      <workItem from="1637847998779" duration="8005000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="LAST_COMMIT_MESSAGE" value="" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="652" y="190" width="944" height="700" key="#PHP" timestamp="1637850468510">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="652" y="190" width="944" height="700" key="#PHP/0.0.1920.1080@0.0.1920.1080" timestamp="1637850468510" />
+    <state x="704" y="298" key="#com.intellij.tools.ToolEditorDialog" timestamp="1637850048855">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="704" y="298" key="#com.intellij.tools.ToolEditorDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1637850048855" />
+    <state x="524" y="117" key="CommitChangelistDialog2" timestamp="1637858118299">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="524" y="117" key="CommitChangelistDialog2/0.0.1920.1080@0.0.1920.1080" timestamp="1637858118299" />
+    <state x="783" y="482" key="NewPhpFileDialog" timestamp="1637453116799">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="783" y="482" key="NewPhpFileDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1637453116799" />
+    <state x="469" y="179" key="SettingsEditor" timestamp="1637850098678">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="469" y="179" key="SettingsEditor/0.0.1920.1080@0.0.1920.1080" timestamp="1637850098678" />
+  </component>
+</project>
