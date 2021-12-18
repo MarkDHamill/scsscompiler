@@ -57,5 +57,5 @@ $lang = array_merge($lang, [
 	'ACP_SCSSCOMPILER_SCSS_LAST_SAVED'			=> 'SCSS files last modified',
 	'ACP_SCSSCOMPILER_SETTING_SAVED'			=> 'Selected styles were recompiled successfully',
 	'ACP_SCSSCOMPILER_STYLE_INFO'				=> 'SCSS-based style',
-
+	'ACP_SCSSCOMPILER_WRITEABLE'				=> 'Style writable'
 ]);
