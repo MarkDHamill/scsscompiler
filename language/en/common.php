@@ -38,10 +38,12 @@ $lang = array_merge($lang, [
 
 	'ACP_SCSSCOMPILER_CANT_FIND_STYLE'			=> 'Can’t find style_id %d, so it cannot be compiled',
 	'ACP_SCSSCOMPILER_CANT_OPEN_CSS_FILE'		=> 'Can’t open file %s. It either does not exist or is not publicly readable.',
-	'ACP_SCSSCOMPILER_CANT_WRITE_CSS_FILE'		=> 'Can’t write to file %s. Make sure the file’s permissions are globally writeable (777)',
+	'ACP_SCSSCOMPILER_CANT_WRITE_THEME_FOLDER'	=> 'Directory %s is not publicly writable. Make sure the file’s permissions are globally writeable (777).',
+	'ACP_SCSSCOMPILER_CANT_WRITE_CSS_FILE'		=> 'Can’t write to file %s. Make sure the file’s permissions are globally writeable (777).',
 	'ACP_SCSSCOMPILER_CODE'						=> 'Code',
+	'ACP_SCSSCOMPILER_CSS_FILE_DOESNT_EXIST'	=> 'File does not exist',
 	'ACP_SCSSCOMPILER_CSS_LAST_SAVED'			=> 'CSS files last modified',
-	'ACP_SCSSCOMPILER_EXPLAIN'					=> 'Certain phpBB styles need to be compiled from .scss source files to reflect new style changes. Any installed styles containing .scss files are shown below. Any <strong>bolded style names</strong> should be recompiled because the compiled .css file is older than the most recently written to .scss file. Check those styles you want to recompile then press the “Recompile checked styles” button.<br><br>To compile a style, a theme/stylesheet.scss file must exist and it must also be a style’s master SCSS file. A style’s theme/stylesheet.css must be publicly writeable and must be the style’s master CSS file.',
+	'ACP_SCSSCOMPILER_EXPLAIN'					=> 'Certain styles must be are compiled from .scss source files. Any installed styles containing .scss files are shown below. Any <strong>bolded style names</strong> should be recompiled because the compiled .css file is older than the most recently written to .scss file. Check those styles you want to recompile then press the “Recompile checked styles” button. Inactive styles are greyed out.<br><br>A theme’s stylesheet.scss file is assumed to be the style’s master SCSS file. A style’s theme/stylesheet.css file must be publicly writable and must be the style’s master CSS file.',
 	'ACP_SCSSCOMPILER_FILE'						=> 'File',
 	'ACP_SCSSCOMPILER_LINE'						=> 'Line',
 	'ACP_SCSSCOMPILER_MARK'						=> 'Mark/unmark',
@@ -55,6 +57,5 @@ $lang = array_merge($lang, [
 	'ACP_SCSSCOMPILER_SCSS_LAST_SAVED'			=> 'SCSS files last modified',
 	'ACP_SCSSCOMPILER_SETTING_SAVED'			=> 'Selected styles were recompiled successfully',
 	'ACP_SCSSCOMPILER_STYLE_INFO'				=> 'SCSS-based style',
-	'ACP_SCSSCOMPILER_WRITEABLE'				=> 'stylesheet.css is writeable'
 
 ]);

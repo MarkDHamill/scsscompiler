@@ -2,9 +2,9 @@
     "name": "phpbbservices/scsscompiler",
     "type": "phpbb-extension",
     "description": "Compiles phpBB SCSS-based styles",
-    "homepage": "https://www.phpbbservices.com/",
-    "version": "1.0.0-dev",
-    "time": "2021-11-25",
+    "homepage": "https://www.phpbbservices.com/my-software/scss-compiler/",
+    "version": "1.0.1-rc",
+    "time": "2021-12-18",
     "license": "GPL-2.0-only",
     "authors": [
         {
@@ -26,7 +26,7 @@
         },
         "version-check": {
             "host": "www.phpbbservices.com",
-            "directory": "/scsscompiler/updatecheck/",
+            "directory": "/other/scsscompiler/updatecheck/",
             "filename": "3.3.json",
             "ssl": true
         }

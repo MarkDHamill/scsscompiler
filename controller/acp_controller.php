@@ -18,10 +18,14 @@ use ScssPhp\ScssPhp\Compiler;
 class acp_controller
 {
 
+	protected $config;
+	protected $db;
 	protected $filesystem;
 	protected $language;
+	protected $phpbb_root_path;
 	protected $request;
 	protected $template;
+	protected $user;
 
 	/**
 	 * Constructor.
@@ -30,11 +34,10 @@ class acp_controller
 	 * @param \phpbb\db\driver\factory 		$db 				The database factory object
 	 * @param \phpbb\filesystem\filesystem 	$filesystem 		Filesystem object
 	 * @param \phpbb\language\language 		$language 			Language object
+	 * @param string 						$phpbb_root_path 	Relative path to phpBB root	 *
 	 * @param \phpbb\request\request		$request			Request object
 	 * @param \phpbb\template\template		$template			Template object
 	 * @param \phpbb\user					$user				User object
-	 * @param \phpbb\template\template 		$template 			Template object
-	 * @param string 						$phpbb_root_path 	Relative path to phpBB root	 *
 	 */
 	public function __construct(\phpbb\config\config $config, \phpbb\language\language $language, \phpbb\request\request $request, \phpbb\template\template $template, \phpbb\user $user, \phpbb\db\driver\factory $db, string $phpbb_root_path, \phpbb\filesystem\filesystem $filesystem)
 	{
@@ -55,7 +58,7 @@ class acp_controller
 	 */
 	public function display_options()
 	{
-		// Add our common language file
+		// Add our common language files
 		$this->language->add_lang('acp/styles');
 		$this->language->add_lang('common', 'phpbbservices/scsscompiler');
 
@@ -78,13 +81,14 @@ class acp_controller
 			if (empty($errors))
 			{
 
-				$styles_to_compile = array();
+				// Get the style_id values to be compiled
+				$styles_to_compile = [];
 				$submit_vars = $this->request->variable_names();
 				foreach ($submit_vars as $submit_var)
 				{
 					if (substr($submit_var, 0, 2) == 's-')
 					{
-						$styles_to_compile[] = (int) substr($submit_var,2);
+						$styles_to_compile[] = substr($submit_var,2);
 					}
 				}
 
@@ -112,29 +116,45 @@ class acp_controller
 					}
 					else
 					{
-						// Check to make sure stylesheet.scss exists
 						$path_to_style = '../styles/' . $rowset[0]['style_path'] . '/theme/';
+
+						// Check to make sure stylesheet.scss exists
 						if (@file_exists($path_to_style . 'stylesheet.scss'))
 						{
 							// Compile the SCSS
-							$css_writeable = true;
+							$css_writable = true;
 
-							// Write to stylesheet.css for the style
-							if (!is_writable($path_to_style . 'stylesheet.css'))
+							// Check if theme folder is writable
+							if (!is_writable($path_to_style))
 							{
-								// Attempt to change the file permissions to 755
+								// Attempt to change the direcory permissions to 777
 								try
 								{
-									$this->filesystem->chmod(array($path_to_style . 'stylesheet.css'),755);
+									$this->filesystem->chmod(array($path_to_style),777);
 								}
 								catch (\Exception $e2)
 								{
-									$css_writeable = false;
+									$css_writable = false;
+									$errors[] = $this->language->lang('ACP_SCSSCOMPILER_CANT_WRITE_THEME_FOLDER' , $path_to_style);
+								}
+							}
+
+							// Make stylesheet.css writable for the style
+							if (!is_writable($path_to_style . 'stylesheet.css'))
+							{
+								// Attempt to change the file permissions to 777
+								try
+								{
+									$this->filesystem->chmod(array($path_to_style . 'stylesheet.css'),777);
+								}
+								catch (\Exception $e2)
+								{
+									$css_writable = false;
 									$errors[] = $this->language->lang('ACP_SCSSCOMPILER_CANT_WRITE_CSS_FILE' , $path_to_style . 'stylesheet.css');
 								}
 							}
 
-							if ($css_writeable)
+							if ($css_writable)
 							{
 								try
 								{
@@ -185,9 +205,8 @@ class acp_controller
 		$active_style = (int) $this->config['default_style'];
 
 		// Get a list of enabled styles
-		$sql = 'SELECT style_id, style_name, style_path 
-				FROM ' . STYLES_TABLE . ' 
-				WHERE style_active = 1';
+		$sql = 'SELECT style_id, style_name, style_path, style_active 
+				FROM ' . STYLES_TABLE;
 		$result = $this->db->sql_query($sql);
 		$rowset = $this->db->sql_fetchrowset($result);
 
@@ -221,17 +240,18 @@ class acp_controller
 				// Get last stylesheet.css modification time
 				$filename = $styles_path . $row['style_path'] . '/theme/' . 'stylesheet.css';
 				$css_time = @file_exists($filename) ? @filemtime($filename) : 0;
-				$css_writeable = is_writable($filename) ? $this->language->lang('YES') : '<strong>' . $this->language->lang('NO') . '</strong>';
+				$css_writable = is_writable($filename) ? $this->language->lang('YES') : '<strong>' . $this->language->lang('NO') . '</strong>';
 
 				$recompile = (bool) $css_time < $scss_time;
 
 				$this->template->assign_block_vars('styles', array(
-						'ACP_SCSSCOMPILER_CSS_TIME'			=> date($this->user->data['user_dateformat'],$css_time),
-						'ACP_SCSSCOMPILER_CSS_WRITEABLE'	=> $css_writeable,
+						'ACP_SCSSCOMPILER_CSS_TIME'			=> $css_time == 0 ? $this->language->lang('ACP_SCSSCOMPILER_CSS_FILE_DOESNT_EXIST') : date($this->user->data['user_dateformat'],$css_time),
+						'ACP_SCSSCOMPILER_CSS_WRITEABLE'	=> $css_writable,
 						'ACP_SCSSCOMPILER_ID' 				=> $row['style_id'],
 						'ACP_SCSSCOMPILER_NAME' 			=> $row['style_name'],
-						'ACP_SCSSCOMPILER_SCSS_TIME'		=> date($this->user->data['user_dateformat'],$scss_time),
+						'ACP_SCSSCOMPILER_SCSS_TIME'		=> date($this->user->data['user_dateformat'], $scss_time),
 						'ACP_SCSSCOMPILER_YES_NO'			=> $override_other_styles && ((int) $row['style_id'] == $active_style) ? $this->language->lang('YES') : $this->language->lang('NO'),
+						'S_ACP_SCSSCOMPILER_INACTIVE'		=> !(bool) $row['style_active'],
 						'S_ACP_SCSSCOMPILER_RECOMPILE'		=> $recompile,
 					)
 				);
@@ -281,7 +301,7 @@ class acp_controller
 			{
 				$files = array_merge($files, $this->find_scss_files($fileInfo->getPathname(), $prefix . $fileInfo->getFilename() . '/'));
 			}
-			elseif ($fileInfo->isFile() && $fileInfo->getExtension() == 'scss')
+			else if ($fileInfo->isFile() && $fileInfo->getExtension() == 'scss')
 			{
 				$files[] = $prefix . $fileInfo->getFilename();
 			}
