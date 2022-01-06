@@ -20,9 +20,9 @@
 			<tr>
 				<th>{{ lang('ACP_SCSSCOMPILER_STYLE_INFO') }}</th>
 				<th class="center">{{ lang('ACP_SCSSCOMPILER_OVERRIDE') }}</th>
-				<th>{{ lang('ACP_SCSSCOMPILER_SCSS_LAST_SAVED') }}</th>
-				<th>{{ lang('ACP_SCSSCOMPILER_CSS_LAST_SAVED') }}</th>
-				<th class="center">{{ lang('ACP_SCSSCOMPILER_WRITEABLE') }}</th>
+				<th>{{ lang('ACP_SCSSCOMPILER_SCSS_FILE') }}</th>
+				<th>{{ lang('ACP_SCSSCOMPILER_CSS_FILE') }}</th>
+				<th class="center">{{ lang('ACP_SCSSCOMPILER_WRITABLE') }}</th>
 				<th class="center">{{ lang('ACP_SCSSCOMPILER_RECOMPILE_STYLE') }}</th>
 			</tr>
 			{% if styles %}
@@ -30,9 +30,9 @@
 			<tr class="{% if style.S_ROW_COUNT is even %}row1{% else %}row2{% endif %}{% if style.S_ACP_SCSSCOMPILER_INACTIVE %} row-inactive{% endif %}">
 				<td>{% if style.S_ACP_SCSSCOMPILER_RECOMPILE %}<span style="font-weight: bold;">{% endif %}{{ style.ACP_SCSSCOMPILER_NAME }}{% if style.S_ACP_SCSSCOMPILER_RECOMPILE %}</span>{% endif %}</td>
 				<td class="center">{{ style.ACP_SCSSCOMPILER_YES_NO }}</td>
-				<td>{{ style.ACP_SCSSCOMPILER_SCSS_TIME }}</td>
-				<td>{{ style.ACP_SCSSCOMPILER_CSS_TIME }}</td>
-				<td class="center">{{ style.ACP_SCSSCOMPILER_CSS_WRITEABLE }}</td>
+				<td><select id="scss" name="scss-{{ style.ACP_SCSSCOMPILER_ID }}">{{ style.ACP_SCSSCOMPILER_SCSS_SELECT }}</select></td>
+				<td><select id="css" name="css-{{ style.ACP_SCSSCOMPILER_ID }}">{{ style.ACP_SCSSCOMPILER_CSS_SELECT }}</select></td>
+				<td class="center">{{ style.ACP_SCSSCOMPILER_CSS_WRITABLE }}</td>
 				<td class="center"><input type="checkbox" name="s-{{ style.ACP_SCSSCOMPILER_ID }}"></td>
 			</tr>
 			{% endfor %}

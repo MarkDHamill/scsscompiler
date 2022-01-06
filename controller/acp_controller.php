@@ -59,14 +59,14 @@ class acp_controller
 	public function display_options()
 	{
 		// Add our common language files
-		$this->language->add_lang('acp/styles');
+		$this->language->add_lang('acp/styles');	// We need a few language variables from phpBB that are not loaded by default
 		$this->language->add_lang('common', 'phpbbservices/scsscompiler');
 
 		// Create a form key for preventing CSRF attacks
 		add_form_key('phpbbservices_scsscompiler_acp');
 
 		// Create an array to collect errors that will be output to the user
-		$errors = [];
+		$errors = array();
 
 		// Is the form being submitted to us?
 		if ($this->request->is_set_post('submit'))
@@ -82,13 +82,13 @@ class acp_controller
 			{
 
 				// Get the style_id values to be compiled
-				$styles_to_compile = [];
+				$styles_to_compile = array();
 				$submit_vars = $this->request->variable_names();
 				foreach ($submit_vars as $submit_var)
 				{
 					if (substr($submit_var, 0, 2) == 's-')
 					{
-						$styles_to_compile[] = substr($submit_var,2);
+						$styles_to_compile[] = (int) substr($submit_var,2);	// This is the style_id
 					}
 				}
 
@@ -97,95 +97,82 @@ class acp_controller
 					trigger_error($this->language->lang('ACP_SCSSCOMPILER_NO_STYLES_TO_COMPILE') . adm_back_link($this->u_action));
 				}
 
+				// Include the 3rd party PHP SCSS library
 				include('../ext/phpbbservices/scsscompiler/vendor/scssphp/scss.inc.php');
 
-				foreach ($styles_to_compile as $style_id)
+				// Get metadata for styles to be compiled
+				$sql_array = array(
+					'SELECT'	=> 'style_id, style_name, style_path',
+					'FROM'		=> array(
+						STYLES_TABLE => 's',
+					),
+					'WHERE'		=> $this->db->sql_in_set('style_id', $styles_to_compile)
+				);
+				$sql = $this->db->sql_build_query('SELECT', $sql_array);
+
+				$result = $this->db->sql_query($sql);
+				$styles = $this->db->sql_fetchrowset($result);
+
+				foreach ($styles as $style)
 				{
 
-					// Get style's metadata
-					$sql = 'SELECT style_name, style_path 
-							FROM ' . STYLES_TABLE . ' 
-							WHERE style_id = ' . (int) $style_id;
-					$result = $this->db->sql_query($sql);
-					$rowset = $this->db->sql_fetchrowset($result);
+					// What .scss file was picked to compile from? The input control's value provides the path needed.
+					$scss_file_path = $this->request->variable('scss-' . $style['style_id'], '');
 
-					if (count($rowset) == 0)
+					// What .css file was picked to compile to? The input control's value provides the path needed.
+					$css_file_path = $this->request->variable('css-' . $style['style_id'], '');
+
+					// Check to make sure the SCSS stylesheet wanted exists
+					if (@file_exists($scss_file_path))
 					{
-						// It would be very strange if the style_id could not be found, but if so let's capture the error
-						$errors[] = $this->language->lang('ACP_SCSSCOMPILER_CANT_FIND_STYLE', $style_id);
+
+						// Make compiled CSS file writable for the style, if needed
+						if (!is_writable($css_file_path))
+						{
+							// Attempt to change the file permissions to 777
+							try
+							{
+								$this->filesystem->chmod(array($css_file_path),777);
+							}
+							catch (\Exception $e2)
+							{
+								$errors[] = $this->language->lang('ACP_SCSSCOMPILER_CANT_WRITE_CSS_FILE' , $css_file_path);
+								break;
+							}
+						}
+
+						// Attempt to compile this style
+						try
+						{
+							$last_slash = strrpos($scss_file_path, '/');
+							$scss_file = substr($scss_file_path, $last_slash + 1);
+							$scss_directory = substr($scss_file_path, 0, $last_slash);
+
+							// Compile the style
+							$compiler = new Compiler();
+							$compiler->setImportPaths($scss_directory);
+							$compiled_css = $compiler->compileString('@import "' . $scss_file . '";')->getCss();
+
+							// Write the compiled CSS
+							$handle = @fopen($css_file_path, 'w');
+							@fwrite($handle, $compiled_css);
+							@fclose($handle);
+							unset($compiler);
+						}
+						catch (\Exception $e)
+						{
+							$errors[] = $this->language->lang('ACP_SCSSCOMPILER_SCSS_COMPILE_ERROR', $style['style_name'], $e->getMessage());
+							break;
+						}
 					}
 					else
 					{
-						$path_to_style = '../styles/' . $rowset[0]['style_path'] . '/theme/';
-
-						// Check to make sure stylesheet.scss exists
-						if (@file_exists($path_to_style . 'stylesheet.scss'))
-						{
-							// Compile the SCSS
-							$css_writable = true;
-
-							// Check if theme folder is writable
-							if (!is_writable($path_to_style))
-							{
-								// Attempt to change the direcory permissions to 777
-								try
-								{
-									$this->filesystem->chmod(array($path_to_style),777);
-								}
-								catch (\Exception $e2)
-								{
-									$css_writable = false;
-									$errors[] = $this->language->lang('ACP_SCSSCOMPILER_CANT_WRITE_THEME_FOLDER' , $path_to_style);
-								}
-							}
-
-							// Make stylesheet.css writable for the style
-							if (!is_writable($path_to_style . 'stylesheet.css'))
-							{
-								// Attempt to change the file permissions to 777
-								try
-								{
-									$this->filesystem->chmod(array($path_to_style . 'stylesheet.css'),777);
-								}
-								catch (\Exception $e2)
-								{
-									$css_writable = false;
-									$errors[] = $this->language->lang('ACP_SCSSCOMPILER_CANT_WRITE_CSS_FILE' , $path_to_style . 'stylesheet.css');
-								}
-							}
-
-							if ($css_writable)
-							{
-								try
-								{
-									// Compile the style
-									$compiler = new Compiler();
-									$compiler->setImportPaths($path_to_style);
-									$compiled_css = $compiler->compileString('@import "stylesheet.scss";')->getCss();
-
-									// Write the compiled CSS
-									$handle = @fopen($path_to_style . 'stylesheet.css', 'w');
-									@fwrite($handle, $compiled_css);
-									@fclose($handle);
-								}
-								catch (\Exception $e)
-								{
-									$errors[] = $this->language->lang('ACP_SCSSCOMPILER_SCSS_COMPILE_ERROR', $rowset[0]['style_name'], $e->getMessage());
-								}
-
-							}
-						}
-						else
-						{
-							$errors[] = $this->language->lang('ACP_SCSSCOMPILER_SCSS_FILE_DOES_NOT_EXIST', $rowset[0]['style_name'], $path_to_style . 'stylesheet.scss');
-						}
-
-						unset($compiler);
+						$errors[] = $this->language->lang('ACP_SCSSCOMPILER_SCSS_FILE_DOES_NOT_EXIST', $style['style_name'], $scss_file_path);
 					}
 
-					$this->db->sql_freeresult($result);
-
 				}
+
+				$this->db->sql_freeresult($result);
 
 				// Option settings have been updated and logged
 				// Confirm this to the user and provide link back to previous page
@@ -204,11 +191,11 @@ class acp_controller
 		$override_other_styles = (bool) $this->config['override_user_style'];
 		$active_style = (int) $this->config['default_style'];
 
-		// Get a list of enabled styles
+		// Get a list of installed styles
 		$sql = 'SELECT style_id, style_name, style_path, style_active 
 				FROM ' . STYLES_TABLE;
 		$result = $this->db->sql_query($sql);
-		$rowset = $this->db->sql_fetchrowset($result);
+		$styles = $this->db->sql_fetchrowset($result);
 
 		$s_errors = !empty($errors);
 
@@ -222,36 +209,65 @@ class acp_controller
 
 		$styles_path = $this->phpbb_root_path . 'styles/';
 
-		foreach ($rowset as $row)
+		foreach ($styles as $style)
 		{
 
 			// Find all .scss files
-			$files = $this->find_scss_files($styles_path . $row['style_path'] . '/');
+			$scss_files = $this->find_scss_files($styles_path . $style['style_path']);
+			$css_files = $this->find_scss_files($styles_path . $style['style_path'], true);
 
-			if (is_array($files) && count($files) > 0)
+			if (is_array($scss_files) && count($scss_files) > 0)
 			{
 				$scss_time = 0;
-				foreach ($files as $file)
+				foreach ($scss_files as $file)
 				{
-					$filename = $styles_path . $row['style_path'] . '/' . $file;
+					$filename = $styles_path . $style['style_path'] . '/' . $file;
 					$scss_time = max(@file_exists($filename) ? @filemtime($filename) : 0, $scss_time);
 				}
 
+				// Build options for a select control containing .scss files found
+				$options_scss = '';
+				foreach ($scss_files as $file)
+				{
+					if (substr($file, -21) === 'theme/stylesheet.scss')
+					{
+						$options_scss .= '<option selected="selected" value="' . $file . '">' . substr($file,12)  . '</option>';
+					}
+					else
+					{
+						$options_scss .= '<option value="' . $file . '">' . substr($file, 12) . '</option>';
+					}
+				}
+
+				// Build options for a select control containing .css files found
+				$options_css = '';
+				foreach ($css_files as $file)
+				{
+					if (substr($file, -20) === 'theme/stylesheet.css')
+					{
+						$options_css .= '<option selected="selected" value="' . $file . '">' . substr($file, 12) . '</option>';
+					}
+					else
+					{
+						$options_css .= '<option value="' . $file . '">' . substr($file,12) . '</option>';
+					}
+				}
+
 				// Get last stylesheet.css modification time
-				$filename = $styles_path . $row['style_path'] . '/theme/' . 'stylesheet.css';
+				$filename = $styles_path . $style['style_path'] . '/theme/' . 'stylesheet.css';
 				$css_time = @file_exists($filename) ? @filemtime($filename) : 0;
 				$css_writable = is_writable($filename) ? $this->language->lang('YES') : '<strong>' . $this->language->lang('NO') . '</strong>';
 
 				$recompile = (bool) $css_time < $scss_time;
 
 				$this->template->assign_block_vars('styles', array(
-						'ACP_SCSSCOMPILER_CSS_TIME'			=> $css_time == 0 ? $this->language->lang('ACP_SCSSCOMPILER_CSS_FILE_DOESNT_EXIST') : date($this->user->data['user_dateformat'],$css_time),
-						'ACP_SCSSCOMPILER_CSS_WRITEABLE'	=> $css_writable,
-						'ACP_SCSSCOMPILER_ID' 				=> $row['style_id'],
-						'ACP_SCSSCOMPILER_NAME' 			=> $row['style_name'],
-						'ACP_SCSSCOMPILER_SCSS_TIME'		=> date($this->user->data['user_dateformat'], $scss_time),
-						'ACP_SCSSCOMPILER_YES_NO'			=> $override_other_styles && ((int) $row['style_id'] == $active_style) ? $this->language->lang('YES') : $this->language->lang('NO'),
-						'S_ACP_SCSSCOMPILER_INACTIVE'		=> !(bool) $row['style_active'],
+						'ACP_SCSSCOMPILER_CSS_SELECT'		=> $options_css,
+						'ACP_SCSSCOMPILER_CSS_WRITABLE'		=> $css_writable,
+						'ACP_SCSSCOMPILER_ID' 				=> $style['style_id'],
+						'ACP_SCSSCOMPILER_NAME' 			=> $style['style_name'],
+						'ACP_SCSSCOMPILER_SCSS_SELECT'		=> $options_scss,
+						'ACP_SCSSCOMPILER_YES_NO'			=> $override_other_styles && ((int) $style['style_id'] == $active_style) ? $this->language->lang('YES') : $this->language->lang('NO'),
+						'S_ACP_SCSSCOMPILER_INACTIVE'		=> !(bool) $style['style_active'],
 						'S_ACP_SCSSCOMPILER_RECOMPILE'		=> $recompile,
 					)
 				);
@@ -276,12 +292,12 @@ class acp_controller
 	/**
 	 * Find all .scss files in directory
 	 *
-	 * @param string $styles_path Path to directory
-	 * @param string $prefix Prefix for files in resulting array
+	 * @param string $styles_path 	Path to directory
+	 * @param boolean $find_css 	If true, finds CSS instead of SCSS files
 	 *
 	 * @return array
 	 */
-	protected function find_scss_files($styles_path, $prefix = '')
+	protected function find_scss_files($styles_path, $find_css = false)
 	{
 		$files = array();
 
@@ -299,11 +315,19 @@ class acp_controller
 
 			if ($fileInfo->isDir())
 			{
-				$files = array_merge($files, $this->find_scss_files($fileInfo->getPathname(), $prefix . $fileInfo->getFilename() . '/'));
+				$files = array_merge($files, $this->find_scss_files($fileInfo->getPathname(), $find_css));
 			}
-			else if ($fileInfo->isFile() && $fileInfo->getExtension() == 'scss')
+			else if ($fileInfo->isFile())
 			{
-				$files[] = $prefix . $fileInfo->getFilename();
+				$file_extension = $fileInfo->getExtension();
+				if ($find_css && $file_extension == 'css')
+				{
+					$files[] = $fileInfo->getPathname();
+				}
+				if (!$find_css && $file_extension == 'scss')
+				{
+					$files[] = $fileInfo->getPathname();
+				}
 			}
 		}
 

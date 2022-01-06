@@ -36,26 +36,24 @@ if (empty($lang) || !is_array($lang))
 
 $lang = array_merge($lang, [
 
-	'ACP_SCSSCOMPILER_CANT_FIND_STYLE'			=> 'Can’t find style_id %d, so it cannot be compiled',
-	'ACP_SCSSCOMPILER_CANT_OPEN_CSS_FILE'		=> 'Can’t open file %s. It either does not exist or is not publicly readable.',
-	'ACP_SCSSCOMPILER_CANT_WRITE_THEME_FOLDER'	=> 'Directory %s is not publicly writable. Make sure the file’s permissions are globally writeable (777).',
-	'ACP_SCSSCOMPILER_CANT_WRITE_CSS_FILE'		=> 'Can’t write to file %s. Make sure the file’s permissions are globally writeable (777).',
+	'ACP_SCSSCOMPILER_CANT_FIND_STYLE'			=> 'No styles were found to compile. The database may be corrupt.',
+	'ACP_SCSSCOMPILER_CANT_WRITE_CSS_FILE'		=> 'Can’t write to file %s. Make sure the directory’s permissions are globally writeable (777).',
 	'ACP_SCSSCOMPILER_CODE'						=> 'Code',
+	'ACP_SCSSCOMPILER_CSS_FILE'					=> 'CSS stylesheet to compile to',
 	'ACP_SCSSCOMPILER_CSS_FILE_DOESNT_EXIST'	=> 'File does not exist',
-	'ACP_SCSSCOMPILER_CSS_LAST_SAVED'			=> 'CSS files last modified',
-	'ACP_SCSSCOMPILER_EXPLAIN'					=> 'Certain styles must be are compiled from .scss source files. Any installed styles containing .scss files are shown below. Any <strong>bolded style names</strong> should be recompiled because the compiled .css file is older than the most recently written to .scss file. Check those styles you want to recompile then press the “Recompile checked styles” button. Inactive styles are greyed out.<br><br>A theme’s stylesheet.scss file is assumed to be the style’s master SCSS file. A style’s theme/stylesheet.css file must be publicly writable and must be the style’s master CSS file.',
+	'ACP_SCSSCOMPILER_EXPLAIN'					=> 'Certain styles must be are compiled from .scss source files. Any installed styles containing .scss files are shown below. Any <strong>bolded style names</strong> should be recompiled because the compiled stylesheet.css file is older than the most recently written .scss file for the style. Styles <span style="color: #999;">in grey</span> are installed but inactive.<br><br>Check those styles you want to recompile then press the “Recompile checked styles” button.<br><br>In general, compile the style’s stylesheet.scss if it exists (which should link in all other .sccs files for the style) and compile to the style’s stylesheet.css file if it exists. You can choose alternate files to compile from and to if they exist. <strong>When a compilation is written to a .css file, it is not recoverable unless backed up.</strong>',
 	'ACP_SCSSCOMPILER_FILE'						=> 'File',
 	'ACP_SCSSCOMPILER_LINE'						=> 'Line',
 	'ACP_SCSSCOMPILER_MARK'						=> 'Mark/unmark',
 	'ACP_SCSSCOMPILER_NO_SCSS_STYLES'			=> 'No SCSS styles are active',
 	'ACP_SCSSCOMPILER_NO_STYLES_TO_COMPILE'		=> 'No styles were selected to compile',
 	'ACP_SCSSCOMPILER_OVERRIDE'					=> 'Style overrides other styles',
-	'ACP_SCSSCOMPILER_RECOMPILE_CHECKED'		=> 'Recompile checked styles',
-	'ACP_SCSSCOMPILER_RECOMPILE_STYLE'			=> 'Recompile style',
+	//'ACP_SCSSCOMPILER_RECOMPILE_CHECKED'		=> 'Recompile checked styles',
+	//'ACP_SCSSCOMPILER_RECOMPILE_STYLE'			=> 'Recompile style',
 	'ACP_SCSSCOMPILER_SCSS_COMPILE_ERROR'		=> 'Can’t compile style “%1$s” due to compilation error(s):<br><br>%2$s',
+	'ACP_SCSSCOMPILER_SCSS_FILE'				=> 'SCSS stylesheet to compile',
 	'ACP_SCSSCOMPILER_SCSS_FILE_DOES_NOT_EXIST'	=> 'Can’t compile style “%1$s” because file %2$s cannot be found.',
-	'ACP_SCSSCOMPILER_SCSS_LAST_SAVED'			=> 'SCSS files last modified',
 	'ACP_SCSSCOMPILER_SETTING_SAVED'			=> 'Selected styles were recompiled successfully',
 	'ACP_SCSSCOMPILER_STYLE_INFO'				=> 'SCSS-based style',
-	'ACP_SCSSCOMPILER_WRITEABLE'				=> 'Style writable'
+	'ACP_SCSSCOMPILER_WRITABLE'					=> 'Style writable'
 ]);
