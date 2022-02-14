@@ -22,6 +22,7 @@ class acp_controller
 	protected $db;
 	protected $filesystem;
 	protected $language;
+	protected $phpbb_log;
 	protected $phpbb_root_path;
 	protected $request;
 	protected $template;
@@ -34,17 +35,19 @@ class acp_controller
 	 * @param \phpbb\db\driver\factory 		$db 				The database factory object
 	 * @param \phpbb\filesystem\filesystem 	$filesystem 		Filesystem object
 	 * @param \phpbb\language\language 		$language 			Language object
-	 * @param string 						$phpbb_root_path 	Relative path to phpBB root	 *
+	 * @param \phpbb\log\log           		$phpbb_log          Log object
+	 * @param string 						$phpbb_root_path 	Relative path to phpBB root
 	 * @param \phpbb\request\request		$request			Request object
 	 * @param \phpbb\template\template		$template			Template object
 	 * @param \phpbb\user					$user				User object
 	 */
-	public function __construct(\phpbb\config\config $config, \phpbb\language\language $language, \phpbb\request\request $request, \phpbb\template\template $template, \phpbb\user $user, \phpbb\db\driver\factory $db, string $phpbb_root_path, \phpbb\filesystem\filesystem $filesystem)
+	public function __construct(\phpbb\config\config $config, \phpbb\language\language $language, \phpbb\log\log $phpbb_log, \phpbb\request\request $request, \phpbb\template\template $template, \phpbb\user $user, \phpbb\db\driver\factory $db, string $phpbb_root_path, \phpbb\filesystem\filesystem $filesystem)
 	{
 		$this->config			= $config;
 		$this->db				= $db;
 		$this->filesystem		= $filesystem;
 		$this->language			= $language;
+		$this->phpbb_log 		= $phpbb_log;
 		$this->phpbb_root_path 	= $phpbb_root_path;
 		$this->request			= $request;
 		$this->template			= $template;
@@ -113,10 +116,12 @@ class acp_controller
 				$result = $this->db->sql_query($sql);
 				$styles = $this->db->sql_fetchrowset($result);
 
+				$css_file_paths = array();
+
 				foreach ($styles as $style)
 				{
 
-					// What .scss file was picked to compile from? The input control's value provides the path needed.
+					// What .scss file was picked to compile? The input control's value provides the path needed.
 					$scss_file_path = $this->request->variable('scss-' . $style['style_id'], '');
 
 					// What .css file was picked to compile to? The input control's value provides the path needed.
@@ -126,43 +131,43 @@ class acp_controller
 					if (@file_exists($scss_file_path))
 					{
 
-						// Make compiled CSS file writable for the style, if needed
-						if (!is_writable($css_file_path))
+						// Make the needed directories if necessary and correct any permission issues
+						$success = $this->make_directories($css_file_path);
+
+						if ($success)
 						{
-							// Attempt to change the file permissions to 777
+							// Attempt to compile this style
 							try
 							{
-								$this->filesystem->chmod(array($css_file_path),777);
+								$last_slash = strrpos($scss_file_path, '/');
+								$scss_file = substr($scss_file_path, $last_slash + 1);
+								$scss_directory = substr($scss_file_path, 0, $last_slash);
+
+								// Compile the style
+								$compiler = new Compiler();
+								$compiler->setImportPaths($scss_directory);
+								$compiled_css = $compiler->compileString('@import "' . $scss_file . '";')->getCss();
+
+								// Write the compiled CSS
+								$handle = @fopen($css_file_path, 'w+');
+								@fwrite($handle, $compiled_css);
+								@fclose($handle);
+								unset($compiler);
+
+								// Note the CSS file compiled
+								$css_file_paths[] = $css_file_path;
 							}
-							catch (\Exception $e2)
+							catch (\Exception $e)
 							{
-								$errors[] = $this->language->lang('ACP_SCSSCOMPILER_CANT_WRITE_CSS_FILE' , $css_file_path);
+								$errors[] = $this->language->lang('ACP_SCSSCOMPILER_SCSS_COMPILE_ERROR', $style['style_name'], $e->getMessage());
 								break;
 							}
 						}
-
-						// Attempt to compile this style
-						try
+						else
 						{
-							$last_slash = strrpos($scss_file_path, '/');
-							$scss_file = substr($scss_file_path, $last_slash + 1);
-							$scss_directory = substr($scss_file_path, 0, $last_slash);
+							trigger_error(strip_tags($this->language->lang('ACP_SCSSCOMPILER_CREATE_ERROR')) . adm_back_link($this->u_action), E_USER_WARNING);
+							return false;
 
-							// Compile the style
-							$compiler = new Compiler();
-							$compiler->setImportPaths($scss_directory);
-							$compiled_css = $compiler->compileString('@import "' . $scss_file . '";')->getCss();
-
-							// Write the compiled CSS
-							$handle = @fopen($css_file_path, 'w');
-							@fwrite($handle, $compiled_css);
-							@fclose($handle);
-							unset($compiler);
-						}
-						catch (\Exception $e)
-						{
-							$errors[] = $this->language->lang('ACP_SCSSCOMPILER_SCSS_COMPILE_ERROR', $style['style_name'], $e->getMessage());
-							break;
 						}
 					}
 					else
@@ -243,13 +248,15 @@ class acp_controller
 				$options_css = '';
 				foreach ($css_files as $file)
 				{
+					// The compilation is placed in the /store/ folder
+					$store_file = str_replace('/styles/','/store/phpbbservices/scsscompiler/',$file);
 					if (substr($file, -20) === 'theme/stylesheet.css')
 					{
-						$options_css .= '<option selected="selected" value="' . $file . '">' . substr($file, 12) . '</option>';
+						$options_css .= '<option selected="selected" value="' . $store_file . '">' . substr($file, 12) . '</option>';
 					}
 					else
 					{
-						$options_css .= '<option value="' . $file . '">' . substr($file,12) . '</option>';
+						$options_css .= '<option value="' . $store_file . '">' . substr($file,12) . '</option>';
 					}
 				}
 
@@ -292,13 +299,19 @@ class acp_controller
 	/**
 	 * Find all .scss files in directory
 	 *
-	 * @param string $styles_path 	Path to directory
-	 * @param boolean $find_css 	If true, finds CSS instead of SCSS files
+	 * @param string $styles_path 			Path to directory
+	 * @param boolean $find_css 			If true, finds CSS instead of SCSS files
 	 *
 	 * @return array
 	 */
 	protected function find_scss_files($styles_path, $find_css = false)
 	{
+		
+		// Finds either all the .scss files in a folder or subfolder, or all the .css files if $find_css = true
+		//
+		// $styles_path - relative path to the style folder
+		// $find_css - true|false. If true, finds .css files, if false finds .scss files
+
 		$files = array();
 
 		if (!file_exists($styles_path))
@@ -332,6 +345,53 @@ class acp_controller
 		}
 
 		return $files;
+
+	}
+
+	private function make_directories($path)
+	{
+		// Makes the necessary folders, if it can, in the /store folder and ensures they are writable if they exist
+		//
+		// path - Path to CSS theme folder, relative, from the phpBB the adm folder. This is set in the form's option tag.
+
+		$directories = array_slice(explode('/', $path),3, 4);
+		$path_so_far = $this->phpbb_root_path . 'store/';
+
+		foreach ($directories as $directory)
+		{
+			$path_so_far .= $directory . '/';
+			if (!$this->filesystem->exists($path_so_far))
+			{
+				try
+				{
+					$this->filesystem->mkdir($path_so_far);
+				}
+				catch (\Exception $e)
+				{
+					$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_SCSSCOMPILER_MKDIR_EXCEPTION', false, array($e->getMessage()));
+					return false;
+				}
+			}
+			else
+			{
+				// Ensure directory is writable
+				if (!$this->filesystem->is_writable($path_so_far))
+				{
+					try
+					{
+						$this->filesystem->chmod($path_so_far, '0777');
+					}
+					catch (\Exception $e)
+					{
+						$this->phpbb_log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONFIG_SCSSCOMPILER_CHDIR_EXCEPTION', false, array($e->getMessage()));
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
+
 	}
 
 }

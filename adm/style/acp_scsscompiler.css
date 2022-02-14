@@ -1,2 +1,12 @@
-fieldset { padding: 0px; margin: 0px; }
-.center { text-align: center; }
+.center {
+	text-align: center;
+}
+fieldset {
+	padding: 0px; margin: 0px;
+}
+li {
+	font-size: .9em;
+}
+table {
+	border-width: 0px;
+}

@@ -37,4 +37,7 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 	'ACP_SCSSCOMPILER_TITLE'			=> 'SCSS compiler',
 	'ACP_SCSSCOMPILER'					=> 'SCSS compiler',
+
+	'LOG_CONFIG_SCSSCOMPILER_CHDIR_EXCEPTION'	=> 'Unable to change directory permissions to 0777. Exception: %s',
+	'LOG_CONFIG_SCSSCOMPILER_MKDIR_EXCEPTION'	=> 'Unable to make directory. Exception: %s',
 ]);

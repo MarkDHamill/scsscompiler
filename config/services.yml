@@ -4,6 +4,7 @@ services:
         arguments:
             - '@config'
             - '@language'
+            - '@log'
             - '@request'
             - '@template'
             - '@user'
