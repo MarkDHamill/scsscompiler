@@ -4,6 +4,13 @@
 fieldset {
 	padding: 0px; margin: 0px;
 }
+fieldset dd {
+	padding: 5px;
+}
+fieldset dt {
+	padding: 5px;
+	border-right: 0px;
+}
 li {
 	font-size: .9em;
 }

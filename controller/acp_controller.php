@@ -65,6 +65,8 @@ class acp_controller
 		$this->language->add_lang('acp/styles');	// We need a few language variables from phpBB that are not loaded by default
 		$this->language->add_lang('common', 'phpbbservices/scsscompiler');
 
+		ob_start();
+
 		// Create a form key for preventing CSRF attacks
 		add_form_key('phpbbservices_scsscompiler_acp');
 
@@ -83,6 +85,9 @@ class acp_controller
 			// If no errors, compile any selected styles
 			if (empty($errors))
 			{
+
+				// Was the download checkbox checked?
+				$download = (bool) ($this->request->variable('phpbbservices_scsscompiler_download', 'off') == 'on');
 
 				// Get the style_id values to be compiled
 				$styles_to_compile = array();
@@ -116,7 +121,20 @@ class acp_controller
 				$result = $this->db->sql_query($sql);
 				$styles = $this->db->sql_fetchrowset($result);
 
+				$make_archive = count($styles) > 1;
+
+				// Remove files and folders under store/phpbbservices/scsscompiler/
+				@$this->filesystem->remove($this->phpbb_root_path . 'store/phpbbservices/scsscompiler/');
+
 				$css_file_paths = array();
+				$archive_path = $this->phpbb_root_path . 'store/phpbbservices/scsscompiler/compiled-styles.zip';
+
+				// Create a new archive
+				if ($make_archive)
+				{
+					$zip_archive = new \ZipArchive();
+					$zip_archive->open($archive_path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+				}
 
 				foreach ($styles as $style)
 				{
@@ -126,6 +144,8 @@ class acp_controller
 
 					// What .css file was picked to compile to? The input control's value provides the path needed.
 					$css_file_path = $this->request->variable('css-' . $style['style_id'], '');
+					$css_file = basename($css_file_path);
+					$css_file_dir = substr(dirname($css_file_path),38);
 
 					// Check to make sure the SCSS stylesheet wanted exists
 					if (@file_exists($scss_file_path))
@@ -139,9 +159,8 @@ class acp_controller
 							// Attempt to compile this style
 							try
 							{
-								$last_slash = strrpos($scss_file_path, '/');
-								$scss_file = substr($scss_file_path, $last_slash + 1);
-								$scss_directory = substr($scss_file_path, 0, $last_slash);
+								$scss_file = basename($scss_file_path);
+								$scss_directory = dirname($scss_file_path);
 
 								// Compile the style
 								$compiler = new Compiler();
@@ -156,9 +175,17 @@ class acp_controller
 
 								// Note the CSS file compiled
 								$css_file_paths[] = $css_file_path;
+
+								// Add to an archive
+								if ($make_archive)
+								{
+									$zip_archive->addEmptyDir($css_file_dir);
+									$zip_archive->addFile($css_file_path, $css_file_dir . DIRECTORY_SEPARATOR . $css_file);
+								}
 							}
 							catch (\Exception $e)
 							{
+								// Save the compilation error for display so the error can be fixed
 								$errors[] = $this->language->lang('ACP_SCSSCOMPILER_SCSS_COMPILE_ERROR', $style['style_name'], $e->getMessage());
 								break;
 							}
@@ -167,7 +194,6 @@ class acp_controller
 						{
 							trigger_error(strip_tags($this->language->lang('ACP_SCSSCOMPILER_CREATE_ERROR')) . adm_back_link($this->u_action), E_USER_WARNING);
 							return false;
-
 						}
 					}
 					else
@@ -177,10 +203,41 @@ class acp_controller
 
 				}
 
+				if ($make_archive)
+				{
+					$zip_archive->close();
+				}
+
 				$this->db->sql_freeresult($result);
+
+				if ($download && count($errors) == 0)
+				{
+					// Download compiled stylesheet or an archive of compiled stylesheets
+					$mime_type = ($make_archive) ? 'application/x-zip-compressed' : 'text/css';
+					$download_file_name = ($make_archive) ? $archive_path : $css_file_path;
+
+					try
+					{
+						header('Content-Description: File Transfer');
+						header("Content-Type: {$mime_type}");
+						header('Content-Disposition: attachment; filename="'. basename($download_file_name) .'"');
+						header('Expires: 0');
+						header('Cache-Control: must-revalidate');
+						header('Pragma: public');
+						header('Content-Length: ' . filesize($download_file_name));
+						readfile($download_file_name);
+					}
+					catch (\Exception $e)
+					{
+						$errors[] = $this->language->lang('ACP_SCSSCOMPILER_DOWNLOAD_ERROR');
+					}
+				}
 
 				// Option settings have been updated and logged
 				// Confirm this to the user and provide link back to previous page
+
+				// Normally the page will not refresh if files are to be downloaded. Some Javascript on form submittal
+				// will warn the user in this case.
 				if (count($errors) == 0)
 				{
 					trigger_error($this->language->lang('ACP_SCSSCOMPILER_SETTING_SAVED') . adm_back_link($this->u_action));
@@ -219,6 +276,8 @@ class acp_controller
 
 			// Find all .scss files
 			$scss_files = $this->find_scss_files($styles_path . $style['style_path']);
+
+			// Find all .css files
 			$css_files = $this->find_scss_files($styles_path . $style['style_path'], true);
 
 			if (is_array($scss_files) && count($scss_files) > 0)
@@ -248,8 +307,8 @@ class acp_controller
 				$options_css = '';
 				foreach ($css_files as $file)
 				{
-					// The compilation is placed in the /store/ folder
-					$store_file = str_replace('/styles/','/store/phpbbservices/scsscompiler/',$file);
+					// The compilation is placed in the /store/ folder, so give the optins tags a valid path to write to
+					$store_file = str_replace('/styles/','/store/phpbbservices/scsscompiler/', $file);
 					if (substr($file, -20) === 'theme/stylesheet.css')
 					{
 						$options_css .= '<option selected="selected" value="' . $store_file . '">' . substr($file, 12) . '</option>';
@@ -263,13 +322,11 @@ class acp_controller
 				// Get last stylesheet.css modification time
 				$filename = $styles_path . $style['style_path'] . '/theme/' . 'stylesheet.css';
 				$css_time = @file_exists($filename) ? @filemtime($filename) : 0;
-				$css_writable = is_writable($filename) ? $this->language->lang('YES') : '<strong>' . $this->language->lang('NO') . '</strong>';
 
 				$recompile = (bool) $css_time < $scss_time;
 
 				$this->template->assign_block_vars('styles', array(
 						'ACP_SCSSCOMPILER_CSS_SELECT'		=> $options_css,
-						'ACP_SCSSCOMPILER_CSS_WRITABLE'		=> $css_writable,
 						'ACP_SCSSCOMPILER_ID' 				=> $style['style_id'],
 						'ACP_SCSSCOMPILER_NAME' 			=> $style['style_name'],
 						'ACP_SCSSCOMPILER_SCSS_SELECT'		=> $options_scss,

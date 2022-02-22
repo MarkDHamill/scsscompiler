@@ -42,24 +42,35 @@ $lang = array_merge($lang, [
 	'ACP_SCSSCOMPILER_CREATE_ERROR'				=> 'Unable to create directories in /store folder. This is likely a file permissions issue.',
 	'ACP_SCSSCOMPILER_CSS_FILE'					=> 'CSS stylesheet to compile to',
 	'ACP_SCSSCOMPILER_CSS_FILE_DOESNT_EXIST'	=> 'File does not exist',
+	'ACP_SCSSCOMPILER_DOWNLOAD'					=> 'Download the compiled styles',
+	'ACP_SCSSCOMPILER_DOWNLOAD_ERROR'			=> 'Unable to download compiled styles',
+	'ACP_SCSSCOMPILER_DOWNLOAD_EXPLAIN'			=> 'Check to also download the compiled files. If more than one style is compiled, an archive compiled-styles.zip is downloaded. The compiled styles can always be found in the /store/phpbbservices/scsscompiler folder.',
+	'ACP_SCSSCOMPILER_DOWNLOAD_WARNING'			=> 'The screen is not normally refreshed if downloads are selected. Look for downloaded files in your downloads folder.',
 	'ACP_SCSSCOMPILER_EXPLAIN'					=> '<p>Certain styles must be compiled to look differently. The styling commands are written in a SASS format. Changes are made to .scss files and compiled to .css files. <a href="https://sass-lang.com/">Learn more about SASS.</a> This extension will compile these kinds of styles.</p>
-<p>The styles folder is not publicly writable. So after compilation, you must manually move the compiled .css files into the style’s theme folder, replacing the old stylesheets. The compiled styles are automatically be stored inside your board’s /store directory, which should be writable.</p>
-<p>In general, compile the style’s stylesheet.scss if it exists (which should link in all other .sccs files for the style) and compile to the style’s stylesheet.css file if it exists. You can choose alternate files to compile from and to if they exist.</p>
-<p><strong>Editing .scss files:</strong></p>
+<p><strong>Editing .scss files</strong></p>
 <ul>
-<li>Download your style’s theme folder with FTP. <strong>You should save a backup copy after downloading.</strong></li>
-<li>Edit the .scss files with a text editor on your computer.</li>
-<li>Upload the changed .scss files to the /styles/<em>&lt;style&gt;</em>/theme folder, overwriting the old files. If a file is in a folder inside the theme folder, make sure you put it in the same folder.</li>
+	<li>Make backup copies of the theme folders of the styles you will alter.</li>
+	<li>Download your styles’ theme folders</li>
+	<li>Edit the .scss files with a text editor on your computer</li>
+	<li>Upload the changed .scss files to the /styles/<em>&lt;style&gt;</em>/theme folders, overwriting the old files</li>
 </ul>
-<p><strong>Compiling styles:</strong></p>
+<p><strong>Compiling styles</strong></p>
 <ul>
-<li>Check those styles you want to recompile then press the “Recompile checked styles” button. Any installed styles containing .scss files are shown below. Any <strong>bolded style names</strong> should be recompiled because the compiled stylesheet.css file is older than the most recently written .scss file for the style. Styles <span style="color: #999;">in grey</span> are inactive. If there are any compilation errors, they will be shown. Fix any errors, and upload the changed .scss files again. Repeat until compilation succeeds.</li>
-<li>The compiled .css files are placed in a /store/phpbbservices/scsscompiler/<em>&lt;style&gt;</em>/theme folder. You can use FTP to download the file inside the folder then upload it to the /styles/<em>&lt;style&gt;</em>/theme folder, overwriting the old .css files. You can also use a file manager provided by your web host to copy these into the correct folder, overwriting the old .css files.</li>
-<li>View the style changes by going to the index. Generally, you do not have to purge the cache to see the style changes. If you don’t see the changes, reload the page. If you still don’t see the changes you made, <a href="https://refreshyourcache.com/en/cache/">refresh your browser’s cache</a> then reload the page. <em>Note</em>: on some servers, you may have to flush a CloudFlare or similar cache too.</li>
+	<li>Generally, compile the style’s stylesheet.scss file and compile to the style’s stylesheet.css file</li>
+	<li>With your edits uploaded, check those styles you want to recompile then press the “Recompile checked styles” button. Any installed styles containing .scss files are shown below. Any <strong>bolded style names</strong> should be recompiled because the compiled stylesheet.css file is older than the most recently written .scss file for the style. Styles <span style="color: #999;">in grey</span> are inactive.</li>
+	<li>If there are any compilation errors, they will be shown. Fix the errors and replace the changed .scss files again. Repeat until compilation succeeds.</li>
 </ul>
-<p>If you need to restore the old files, upload your backup copy of the theme folder to the same theme folder, overwriting any files you changed. You may need to also purge the cache on the main page of the ACP.</p>',
+<p><strong>Placing the compiled styles</strong></p>	
+<ul>
+	<li>Download the compiled .css files from the /store/phpbbservices/scsscompiler/<em>&lt;style&gt;</em>/theme folder</li>
+	<li>Then upload them to the /styles/<em>&lt;style&gt;</em>/theme folder, overwriting the old files</li>
+</ul>
+<p><strong>Viewing the style changes</strong></p>
+<p>Go to the index. If you don’t see the changes, reload the page. If you still don’t see the changes you made, <a href="https://refreshyourcache.com/en/cache/">refresh your browser’s cache</a> then reload the page. <em>Note</em>: on some servers, you may have to flush a CloudFlare or similar cache too.</p>
+<p><strong>Restoring the style changes</strong></p>
+<p>Upload your backup copy of the theme folder to the same theme folder, overwriting any files you changed. You may need to also purge the cache on the main page of the ACP.</p>',
 	'ACP_SCSSCOMPILER_FILE'						=> 'File',
-	'ACP_SCSSCOMPILER_INSTALL_REQUIREMENTS'		=> 'Your version of PHP must be &gt; 3.3.0 and &lt; 4.0 to install this extension. Please address this issue, then try enabling the extension again.',
+	'ACP_SCSSCOMPILER_INSTALL_REQUIREMENTS'		=> 'Your version of PHP must be &gt; 3.3.0 and &lt; 4.0 to install this extension. In addition the zip extension is required. Please address this issue, then try enabling the extension again.',
 	'ACP_SCSSCOMPILER_LINE'						=> 'Line',
 	'ACP_SCSSCOMPILER_MARK'						=> 'Mark/unmark',
 	'ACP_SCSSCOMPILER_NO_SCSS_STYLES'			=> 'No SCSS styles are active',
@@ -73,5 +84,4 @@ $lang = array_merge($lang, [
 	'ACP_SCSSCOMPILER_SETTING_SAVED'			=> 'Selected styles were recompiled successfully. They now need to be moved to the correct theme folders.',
 	'ACP_SCSSCOMPILER_STORE'					=> 'Write to /store/phpbbservices/scsscompiler/<em>&lt;style&gt;</em>/theme folder',
 	'ACP_SCSSCOMPILER_STYLE_INFO'				=> 'SCSS-based style',
-	'ACP_SCSSCOMPILER_WRITABLE'					=> 'Style writable'
 ]);
