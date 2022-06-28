@@ -3,8 +3,8 @@
     "type": "phpbb-extension",
     "description": "Compiles phpBB SCSS-based styles",
     "homepage": "https://www.phpbbservices.com/my-software/scss-compiler/",
-    "version": "1.0.4",
-    "time": "2022-02-22",
+    "version": "1.0.5",
+    "time": "2022-06-28",
     "license": "GPL-2.0-only",
     "authors": [
         {
@@ -23,7 +23,6 @@
         "display-name": "SCSS Compiler",
         "soft-require": {
             "phpbb/phpbb": ">=3.3.0,<3.4.0@dev",
-            "ext-zip": "*",
             "scssphp/scssphp": "*"
         },
         "version-check": {

@@ -8,28 +8,14 @@
 		<p>{{ ERROR_MSG }}</p>
 	</div>
 {% endif %}
-<script>
-function download_warning()
-{
-	// Is download checkbox checked?
-	download = document.getElementById("phpbbservices_scsscompiler_download").checked;
-	if (download) {
-		alert('{{ lang('ACP_SCSSCOMPILER_DOWNLOAD_WARNING') }}');
-	}
-}
-</script>
 
-<form id="phpbbservices_scsscompiler_acp" name="phpbbservices_scsscompiler_acp" method="post" action="{{ U_ACTION }}" onsubmit="download_warning();">
+<form id="phpbbservices_scsscompiler_acp" name="phpbbservices_scsscompiler_acp" method="post" action="{{ U_ACTION }}">
 	<p>{{ lang('ACP_SCSSCOMPILER_EXPLAIN') }}</p>
 
 	<fieldset class="quick">
 		<p class="small"><a href="#" onclick="marklist('phpbbservices_scsscompiler_acp', 's-', true);">{{ lang('MARK_ALL') }}</a> &bull; <a href="#" onclick="marklist('phpbbservices_scsscompiler_acp', 's-', false);">{{ lang('UNMARK_ALL') }}</a></p>
 	</fieldset>
 	<fieldset>
-		<dl>
-			<dt><label for="phpbbservices_scsscompiler_download">{{ lang('ACP_SCSSCOMPILER_DOWNLOAD') ~ lang('COLON') }}</label><br>{{ lang('ACP_SCSSCOMPILER_DOWNLOAD_EXPLAIN') }}</dt>
-			<dd><input type="checkbox" id="phpbbservices_scsscompiler_download" name="phpbbservices_scsscompiler_download"{% if S_ACP_SCSSCOMPILER_DOWNLOAD %} checked="checked"{% endif %}></dd>
-		</dl>
 		<table>
 			<tr>
 				<th>{{ lang('ACP_SCSSCOMPILER_STYLE_INFO') }}</th>

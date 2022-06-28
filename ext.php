@@ -23,8 +23,7 @@ class ext extends \phpbb\extension\base
 		// Only phpBB 3.3 is supported.
 		if (
 			phpbb_version_compare($config['version'], '3.3.0', '>=') &&
-			phpbb_version_compare($config['version'], '4.0', '<') &&
-			extension_loaded('zip')
+			phpbb_version_compare($config['version'], '3.4.0', '<')
 		)
 		{
 			// Conditions met to install extension
