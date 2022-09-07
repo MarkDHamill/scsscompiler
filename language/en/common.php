@@ -43,13 +43,15 @@ $lang = array_merge($lang, [
 <h2>Editing .scss files</h2>
 <p><strong>Make backup copies of the theme folders of the styles you will alter.</strong> Often you can edit the files using a file manager tool in your web host control panel. Otherwise, download your styles’ theme folders, then edit the .scss files with a text editor on your computer. Then upload the changed .scss files to the /styles/<em>&lt;style&gt;</em>/theme folders, overwriting the old files.</p>
 <h2>Compiling .scss files</h2>
-<p>Installed SASS-formatted styles, if any, are shown below. A master SCSS stylesheet stylesheet.scss is assumed. A compiled stylesheet stylesheet.scss is also assumed. Change these if incorrect. Click the checkboxes for the styles you want to compile, then press “Recompile checked styles”. If the file cannot be written to the style’s theme folder, the file will be placed in a /store/phpbbservices/scsscompiler/<em>&lt;style&gt;</em>/theme folder instead. You will be notified if this happens. In this case you should move the file manually into the correct theme folder using FTP or a file manager. If there is a compilation error for a style, the compilation error will show. In this case fix the error and recompile.</p>
+<p>Installed SASS-formatted styles, if any, are shown below. A master SCSS stylesheet stylesheet.scss is assumed. A compiled stylesheet stylesheet.css is also assumed. Change these if incorrect. Click the checkboxes for the styles you want to compile, then press “Recompile checked styles”. If the file cannot be written to the style’s theme folder, the file will be placed in a /store/phpbbservices/scsscompiler/<em>&lt;style&gt;</em>/theme folder instead. You will be notified if this happens. In this case you should move the file manually into the correct theme folder using FTP or a file manager. If there is a compilation error for a style, the compilation error will show. Fix the error then recompile.</p>
 <h2>Viewing the style changes</h2>
 <p>Go to the index. If you don’t see the changes, reload the page. If you still don’t see the changes you made, <a href="https://refreshyourcache.com/en/cache/">refresh your browser’s cache</a> then reload the page. <em>Note</em>: on some servers, you may have to flush a CloudFlare or similar cache too.</p>
 <h2>Restoring the style changes</h2>
 <p>Upload your backup copy of the theme folder to the same theme folder, overwriting any files you changed. You may need to also purge the cache on the main page of the ACP.</p>',
 	'ACP_SCSSCOMPILER_INSTALL_REQUIREMENTS'		=> 'Your version of PHP must be &gt; 3.3.0 and &lt; 3.4 to install this extension. In addition the zip extension is required. Please address this issue, then try enabling the extension again.',
+	'ACP_SCSSCOMPILER_LAST_MODIFIED'			=> 'stylesheet.css last updated on',
 	'ACP_SCSSCOMPILER_MARK'						=> 'Mark/unmark',
+	'ACP_SCSSCOMPILER_NEVER'					=> 'Not found or never',
 	'ACP_SCSSCOMPILER_NO_SCSS_STYLES'			=> 'No SCSS styles are active',
 	'ACP_SCSSCOMPILER_NO_STYLES_TO_COMPILE'		=> 'No styles were selected to compile',
 	'ACP_SCSSCOMPILER_OVERRIDE'					=> 'Style overrides other styles',

@@ -319,12 +319,17 @@ class acp_controller
 
 				// Get last stylesheet.css modification time
 				$filename = $styles_path . $style['style_path'] . '/theme/stylesheet.css';
-				$css_time = @file_exists($filename) ? @filemtime($filename) : 0;
+				$css_time = 0;
+				if (strpos($filename,'stylesheet.css') !== false)
+				{
+					$css_time = @file_exists($filename) ? @filemtime($filename) : 0;
+				}
 
 				$recompile = (bool) $css_time < $scss_time;
 
 				$this->template->assign_block_vars('styles', array(
 						'ACP_SCSSCOMPILER_CSS_SELECT'		=> $options_css,
+						'ACP_SCSSCOMPILER_CSS_TIME'			=> $css_time > 0 ? $this->user->format_date($css_time): $this->language->lang('ACP_SCSSCOMPILER_NEVER'),
 						'ACP_SCSSCOMPILER_ID' 				=> $style['style_id'],
 						'ACP_SCSSCOMPILER_NAME' 			=> $style['style_name'],
 						'ACP_SCSSCOMPILER_SCSS_SELECT'		=> $options_scss,

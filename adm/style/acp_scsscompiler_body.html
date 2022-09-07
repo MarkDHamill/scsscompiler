@@ -22,6 +22,7 @@
 				<th class="center">{{ lang('ACP_SCSSCOMPILER_OVERRIDE') }}</th>
 				<th>{{ lang('ACP_SCSSCOMPILER_SCSS_FILE') }}</th>
 				<th>{{ lang('ACP_SCSSCOMPILER_CSS_FILE') }}</th>
+				<th>{{ lang('ACP_SCSSCOMPILER_LAST_MODIFIED') }}</th>
 				<th class="center">{{ lang('ACP_SCSSCOMPILER_RECOMPILE_STYLE') }}</th>
 			</tr>
 			{% if styles %}
@@ -31,6 +32,7 @@
 				<td class="center">{{ style.ACP_SCSSCOMPILER_YES_NO }}</td>
 				<td><select id="scss-{{ style.ACP_SCSSCOMPILER_ID }}" name="scss-{{ style.ACP_SCSSCOMPILER_ID }}">{{ style.ACP_SCSSCOMPILER_SCSS_SELECT }}</select></td>
 				<td><select id="css-{{ style.ACP_SCSSCOMPILER_ID }}" name="css-{{ style.ACP_SCSSCOMPILER_ID }}">{{ style.ACP_SCSSCOMPILER_CSS_SELECT }}</select></td>
+				<td>{{ style.ACP_SCSSCOMPILER_CSS_TIME }}</td>
 				<td class="center"><input type="checkbox" name="s-{{ style.ACP_SCSSCOMPILER_ID }}"></td>
 			</tr>
 			{% endfor %}
